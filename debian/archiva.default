@@ -1,0 +1,5 @@
+# Override any options to pass to Archiva wrapper.
+#ARCHIVA_OPTS=""
+
+# Turn on/off verbose logging for the Archiva init.d service script.
+VERBOSE=yes

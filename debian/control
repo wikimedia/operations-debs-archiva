@@ -1,0 +1,19 @@
+Source: archiva
+Section: misc
+Priority: extra
+Maintainer: Andrew Otto (WMF) <otto@wikimedia.org>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.3
+Homepage: http://archiva.apache.org
+
+Package: archiva
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, adduser
+Description: Apache Archiva is a JVM based build artifact repository.
+ Apache Archiva™ is an extensible repository management software that helps
+ taking care of your own personal or enterprise-wide build artifact repository.
+ It is the perfect companion for build tools such as Maven, Continuum, and ANT.
+ .
+ Archiva offers several capabilities, amongst which remote repository proxying,
+ security access management, build artifact storage, delivery, browsing,
+ indexing and usage reporting, extensible scanning functionality… and many more!
