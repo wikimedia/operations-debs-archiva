@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache.archiva</groupId>
     <artifactId>archiva-web</artifactId>
-    <version>2.0.0</version>
+    <version>2.2.3</version>
   </parent>
   <artifactId>archiva-webapp</artifactId>
   <packaging>war</packaging>
@@ -42,16 +42,15 @@
     <test.useTomcat>false</test.useTomcat>
     <archiva.groupIndexTtl>30</archiva.groupIndexTtl>
     <archiva.sirona.configuration />
+    <archiva.repositorySessionFactory.id>jcr</archiva.repositorySessionFactory.id>
+    <cassandra.host>localhost</cassandra.host>
+    <cassandra.port>9160</cassandra.port>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.apache.archiva</groupId>
       <artifactId>generic-metadata-support</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.archiva</groupId>
-      <artifactId>npanday-support</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.archiva</groupId>
@@ -124,12 +123,17 @@
       <groupId>org.apache.archiva</groupId>
       <artifactId>metadata-store-jcr</artifactId>
     </dependency>
-    <!--
+
+    <dependency>
+      <groupId>org.apache.archiva</groupId>
+      <artifactId>metadata-store-file</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.archiva</groupId>
       <artifactId>metadata-store-cassandra</artifactId>
     </dependency>
-    -->
+
     <dependency>
       <groupId>org.apache.jackrabbit</groupId>
       <artifactId>jackrabbit-jcr-commons</artifactId>
@@ -722,18 +726,6 @@
           <groupId>stax</groupId>
           <artifactId>stax-api</artifactId>
         </exclusion>
-        <exclusion>
-          <groupId>org.extremecomponents</groupId>
-          <artifactId>extremecomponents</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>taglibs</groupId>
-          <artifactId>standard</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>javax.servlet</groupId>
-          <artifactId>jstl</artifactId>
-        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -771,61 +763,12 @@
     </dependency>
     <dependency>
       <groupId>org.apache.cxf</groupId>
-      <artifactId>cxf-bundle-jaxrs</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.eclipse.jetty</groupId>
-          <artifactId>jetty-server</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.eclipse.jetty</groupId>
-          <artifactId>jetty-continuation</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.eclipse.jetty</groupId>
-          <artifactId>jetty-http</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.eclipse.jetty</groupId>
-          <artifactId>jetty-io</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.eclipse.jetty</groupId>
-          <artifactId>jetty-util</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.eclipse.jetty</groupId>
-          <artifactId>jetty-security</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.geronimo.specs</groupId>
-          <artifactId>geronimo-servlet_2.5_spec</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.geronimo.specs</groupId>
-          <artifactId>geronimo-javamail_1.4_spec</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.geronimo.specs</groupId>
-          <artifactId>geronimo-stax-api_1.0_spec</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.geronimo.specs</groupId>
-          <artifactId>geronimo-activation_1.1_spec</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.codehaus.jettison</groupId>
-          <artifactId>jettison</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.sun.xml.bind</groupId>
-          <artifactId>jaxb-impl</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>javax.xml.bind</groupId>
-          <artifactId>jaxb-api</artifactId>
-        </exclusion>
-      </exclusions>
+      <artifactId>cxf-rt-frontend-jaxrs</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-rt-rs-extension-providers</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
@@ -841,6 +784,11 @@
       <artifactId>jsoup</artifactId>
     </dependency>
 
+    <!-- we need to force xalan version for IBM servers.. MRM-1803 -->
+    <dependency>
+      <groupId>xalan</groupId>
+      <artifactId>xalan</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.apache.archiva</groupId>
@@ -908,6 +856,7 @@
               <exclude>src/site/resources/js/*.js</exclude>
               <exclude>src/test/repositories/test-repo/**</exclude>
               <exclude>src/main/resources/META-INF/services/*</exclude>
+              <exclude>src/main/resources/META-INF/cxf/*</exclude>
             </excludes>
           </configuration>
         </plugin>
@@ -1010,13 +959,12 @@
             <archiva.devMode>${archiva.devMode}</archiva.devMode>
             <archiva.javascriptLog>${archiva.javascriptLog}</archiva.javascriptLog>
             <archiva.logMissingI18n>${archiva.logMissingI18n}</archiva.logMissingI18n>
-            <!--
-            not needed as we use asyncLogger in configuration
-            <Log4jContextSelector>org.apache.logging.log4j.core.async.AsyncLoggerContextSelector</Log4jContextSelector>
-            -->
-            <cassandraHost>localhost</cassandraHost>
-            <cassandraPort>9160</cassandraPort>
+            <cassandra.host>${cassandra.host}</cassandra.host>
+            <cassandra.port>${cassandra.port}</cassandra.port>
+            <archiva.repositorySessionFactory.id>${archiva.repositorySessionFactory.id}</archiva.repositorySessionFactory.id>
             <org.apache.sirona.configuration.sirona.properties>${archiva.sirona.configuration}</org.apache.sirona.configuration.sirona.properties>
+            <AsyncLoggerConfig.WaitStrategy>Block</AsyncLoggerConfig.WaitStrategy>
+            <AsyncLogger.WaitStrategy>Block</AsyncLogger.WaitStrategy>
           </systemProperties>
           <additionalClasspathDirs>
             <additionalClasspathDir>${basedir}/src/test/tomcat</additionalClasspathDir>
@@ -1100,5 +1048,14 @@
 
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>cassandra</id>
+      <properties>
+        <archiva.repositorySessionFactory.id>cassandra</archiva.repositorySessionFactory.id>
+      </properties>
+    </profile>
+  </profiles>
 
 </project>
