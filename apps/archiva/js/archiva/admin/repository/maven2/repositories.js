@@ -28,8 +28,7 @@ function(jquery,i18n,jqueryTmpl,bootstrap,jqueryValidate,ko) {
   }
 
   window.managedRepositoryTypes = [
-            new ManagedRepositoryType("default","Maven 2.x Repository"),
-            new ManagedRepositoryType("legacy", "Maven 1.x Repository")
+            new ManagedRepositoryType("default","Maven 2.x Repository")
             ];
 
   ManagedRepository=function(id,name,layout,indexDirectory,location,snapshots,releases,blockRedeployments,cronExpression,
@@ -693,7 +692,7 @@ function(jquery,i18n,jqueryTmpl,bootstrap,jqueryValidate,ko) {
 
   RemoteRepository=function(id,name,layout,indexDirectory,url,userName,password,timeout,downloadRemoteIndex,remoteIndexUrl,
                             remoteDownloadNetworkProxyId,cronExpression,remoteDownloadTimeout,downloadRemoteIndexOnStartup,
-                            description,extraParametersEntries,extraHeadersEntries){
+                            description,extraParametersEntries,extraHeadersEntries,checkPath){
 
     var self=this;
 
@@ -775,6 +774,9 @@ function(jquery,i18n,jqueryTmpl,bootstrap,jqueryValidate,ko) {
       self.modified(true);
     });
 
+    this.checkPath=ko.observable(checkPath);
+    this.checkPath.subscribe(function(newValue){self.modified(true)});
+
     this.modified=ko.observable(false);
   }
 
@@ -800,7 +802,7 @@ function(jquery,i18n,jqueryTmpl,bootstrap,jqueryValidate,ko) {
     return new RemoteRepository(data.id,data.name,data.layout,data.indexDirectory,data.url,data.userName,data.password,
                                 data.timeout,data.downloadRemoteIndex,data.remoteIndexUrl,data.remoteDownloadNetworkProxyId,
                                 data.cronExpression,data.remoteDownloadTimeout,data.downloadRemoteIndexOnStartup,data.description,
-                                extraParametersEntries,extraHeadersEntries);
+                                extraParametersEntries,extraHeadersEntries,data.checkPath);
   }
 
   mapRemoteRepositories=function(data){
@@ -1230,10 +1232,13 @@ function(jquery,i18n,jqueryTmpl,bootstrap,jqueryValidate,ko) {
                     success: function(result){
                       $.log("result:"+result);
                       if(result=="true"){
-                        mainContent.find("img[id='"+repoId+"']").attr("src", "images/weather-clear.png" )
+                        mainContent.find("img[id='"+repoId+"']").attr("src", "images/weather-clear.png" );
                       } else {
-                        mainContent.find("img[id='"+repoId+"']").attr("src", "images/weather-severe-alert-16-16.png" )
+                        mainContent.find("img[id='"+repoId+"']").attr("src", "images/weather-severe-alert-16-16.png" );
                       }
+                    },
+                    error: function(result){
+                        mainContent.find("img[id='"+repoId+"']").attr("src", "images/weather-severe-alert-16-16.png" );
                     }
                   });
                 });

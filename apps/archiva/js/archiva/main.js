@@ -22,7 +22,7 @@ define("archiva.main",["jquery","jquery.ui","sammy","jquery.tmpl",'i18n',"jquery
 function(jquery,ui,sammy,tmpl,i18n,jqueryCookie,bootstrap,archivaSearch,jqueryValidate,jqueryJson,ko,typeahead) {
 
   /**
-   * reccord a cookie for session with the logged user
+   * record a cookie for session with the logged user
    * @param user see user.js
    */
   reccordLoginCookie=function(user) {
@@ -35,9 +35,12 @@ function(jquery,ui,sammy,tmpl,i18n,jqueryCookie,bootstrap,archivaSearch,jqueryVa
 
     var expires= Number(window.cookieInformation.timeout);
 
-    var userJson=ko.toJSON(user);
+    var kUser = new User(user.username, user.password, user.confirmPassword,user.fullName,user.email,user.permanent,user.validated,
+                         user.timestampAccountCreation,user.timestampLastLogin,user.timestampLastPasswordChange,user.locked,
+                         user.passwordChangeRequired,null,user.readOnly,user.userManagerId, user.validationToken);
 
-    $.log("reccordLoginCookie:expires:"+expires+",path:"+path+",domain:"+domain+",secure:"+secure+",user:"+userJson);
+    kUser.rememberme(user.rememberme());
+    var userJson=ko.toJSON(kUser);
 
     var options = null;
     if (secure == 'true'){
@@ -55,19 +58,24 @@ function(jquery,ui,sammy,tmpl,i18n,jqueryCookie,bootstrap,archivaSearch,jqueryVa
       }
     }
 
-    $.cookie('archiva_login', userJson,options);
+    $.cookie('archiva_login',userJson,options);
   };
 
   getUserFromLoginCookie=function(){
     var cookieContent=$.cookie('archiva_login');
-    $.log("archiva_login cookie content:"+cookieContent);
+    $.log("archiva_getUserFromLoginCookie cookie content:"+cookieContent);
+    if (!cookieContent) {
+      return null;
+    }
     var user = $.parseJSON(cookieContent);
     if(!user){
       return null;
     }
     var kUser = new User(user.username, user.password, user.confirmPassword,user.fullName,user.email,user.permanent,user.validated,
                     user.timestampAccountCreation,user.timestampLastLogin,user.timestampLastPasswordChange,user.locked,
-                    user.passwordChangeRequired,null,user.readOnly,user.userManagerId)
+                    user.passwordChangeRequired,null,user.readOnly,user.userManagerId, user.validationToken);
+
+    $.log("user.rememberme:"+user.rememberme);
 
     kUser.rememberme(user.rememberme);
     return kUser;
@@ -76,7 +84,7 @@ function(jquery,ui,sammy,tmpl,i18n,jqueryCookie,bootstrap,archivaSearch,jqueryVa
 
 
   logout=function(){
-    var user = getUserFromLoginCookie();
+    var user = window.user;//getUserFromLoginCookie();
     if(user){
       user.logged=false;
       reccordLoginCookie(user);
@@ -346,6 +354,7 @@ function(jquery,ui,sammy,tmpl,i18n,jqueryCookie,bootstrap,archivaSearch,jqueryVa
           var classifier= terms.length>3?terms[3]:"";
           var packaging= terms.length>4?terms[4]:"";
           var className= terms.length>5?terms[5]:"";
+          var pageSize= terms.length>6?terms[6]:"";
           $.log("groupId:artifactId:version:classifier:packaging:className="+groupId+':'+artifactId+':'+version+':'+classifier+':'+packaging+':'+className);
           var searchViewModel = new SearchViewModel();
           var searchRequest = new SearchRequest();
@@ -355,6 +364,7 @@ function(jquery,ui,sammy,tmpl,i18n,jqueryCookie,bootstrap,archivaSearch,jqueryVa
           searchRequest.classifier(classifier);
           searchRequest.packaging(packaging);
           searchRequest.className(className);
+          searchRequest.pageSize(pageSize);
           //searchRequest.repositories=repos;
           //searchRequest.selectedRepoIds=repos;
           searchViewModel.searchRequest(searchRequest);
@@ -850,6 +860,21 @@ function(jquery,ui,sammy,tmpl,i18n,jqueryCookie,bootstrap,archivaSearch,jqueryVa
     return $.inArray(karmaName,window.redbackModel.operatioNames)>=0;
   };
 
+  addValidationTokenHeader=function(user) {
+    if(user) {
+      if (user.validationToken) {
+        $.log("Adding validation token "+user.validationToken);
+        $.ajaxSetup({
+                      beforeSend: function (xhr) {
+                        xhr.setRequestHeader('X-XSRF-TOKEN', user.validationToken);
+                      }
+                    });
+      } else {
+        $.log("No validation token in user object "+user.username+", "+user.validationToken);
+      }
+    }
+  };
+
   startArchivaApplication=function(){
 
     $.log("startArchivaApplication");
@@ -875,6 +900,103 @@ function(jquery,ui,sammy,tmpl,i18n,jqueryCookie,bootstrap,archivaSearch,jqueryVa
 
     window.sammyArchivaApplication.run();
 
+
+    var user = getUserFromLoginCookie();
+
+    $.log("found user:"+(user==null?"null":user.username()+":"+user.password()+":"+user.rememberme()));
+
+    // if user has details as username and passowrd and rememberme is on just try to log it
+    if (user!=null&&user.username()!=null&&user.password()!=null&&user.rememberme()==true){
+      window.redbackModel.rememberme=user.rememberme();
+      window.redbackModel.password=user.password();
+      loginCall(user.username(),user.password(),user.rememberme()
+          ,successLoginCallbackFn,errorLoginCallbackFn,completeLoginCallbackFn);
+    } else {
+      // Token for origin validation
+      addValidationTokenHeader(user);
+    }
+
+  };
+
+
+  /**
+   * callback success function on rest login call.
+   * modal close and hide/show some links (login,logout,register...)
+   * @param result
+   */
+   successLoginCallbackFn=function(result){
+
+    var logged = false;
+    if (result == null) {
+      logged = false;
+    } else {
+      if (result.username) {
+        logged = true;
+      }
+    }
+    if (logged == true) {
+      var user = mapUser(result);
+      addValidationTokenHeader(user);
+
+      if (user.passwordChangeRequired()==true){
+        changePasswordBox(true,false,user);
+        return;
+      }
+      // not really needed as an exception is returned but "ceintures et bretelles" as we say in French :-)
+      if (user.locked()==true){
+        $.log("user locked");
+        displayErrorMessage($.i18n.prop("account.locked"));
+        return;
+      }
+
+
+      $.log("window.redbackModel.rememberme:"+window.redbackModel.rememberme);
+      user.rememberme(window.redbackModel.rememberme);
+      if(user.rememberme()){
+        user.password(window.redbackModel.password);
+      }
+      $.log("user.rememberme:"+(user.rememberme()));
+      reccordLoginCookie(user);
+      window.user=user;
+      $("#login-link").hide();
+      $("#logout-link").show();
+      $("#register-link").hide();
+      $("#change-password-link").show();
+      if (window.modalLoginWindow){
+        window.modalLoginWindow.modal('hide');
+      }
+      clearForm("#user-login-form");
+      decorateMenuWithKarma(user);
+
+      // Token for origin validation
+      $("#login-welcome" ).show();
+      $("#welcome-label" ).html( $.i18n.prop("user.login.welcome",user.username()));
+      return;
+    }
+    var modalLoginErrMsg=$("#modal-login-err-message");
+    modalLoginErrMsg.html($.i18n.prop("incorrect.username.password"));
+    modalLoginErrMsg.show();
+  };
+
+  /**
+   * callback error function on rest login call. display error message
+   * @param result
+   */
+  errorLoginCallbackFn= function(result) {
+    var obj = jQuery.parseJSON(result.responseText);
+    displayRedbackError(obj,"modal-login-err-message");
+    $("#modal-login-err-message").show();
+  };
+
+  /**
+   * callback complate function on rest login call. remove spinner from modal login box
+   * @param result
+   */
+  completeLoginCallbackFn=function(){
+    $("#modal-login-ok").button("reset");
+    $("#small-spinner").remove();
+    // force current screen reload to consider user karma
+    window.sammyArchivaApplication.refresh();
   };
 
   drawQuickSearchAutocomplete=function(selector){

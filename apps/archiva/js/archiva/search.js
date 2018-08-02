@@ -868,7 +868,7 @@ define("archiva.search",["jquery","jquery.ui","i18n","jquery.tmpl","select2","kn
     }
 
 
-    this.gridMetatadasViewModel = new ko.simpleGrid.viewModel({
+    this.gridMetadataViewModel = new ko.simpleGrid.viewModel({
       data: self.entries,
       pageSize: 10
     });
@@ -936,7 +936,7 @@ define("archiva.search",["jquery","jquery.ui","i18n","jquery.tmpl","select2","kn
       ko.applyBindings(artifactDetailsDownloadViewModel,mainContent.find("#artifact-details-download-content" ).get(0));
 
 
-      mainContent.find("#artifact-download-list-files li img" ).on("click",function(){
+      mainContent.find("#artifact-download-list-files tr td img" ).on("click",function(){
         mainContent.find("#artifact_content_tree").empty();
         var contentText = mainContent.find("#artifact-content-text" );
         contentText.empty();
@@ -1398,14 +1398,22 @@ define("archiva.search",["jquery","jquery.ui","i18n","jquery.tmpl","select2","kn
     // #browse~internal/org.apache.maven
     // or #artifact~snapshots/org.apache.maven.plugins/maven-compiler-plugin
     var currentHash=window.location.hash;
-    $.log("currentHash:"+currentHash);
+    //$.log("currentHash:"+currentHash);
     var newLocation = currentHash.substringBeforeFirst("/");
+    //$.log("changeBrowseRepository newLocation:"+newLocation);
     // maybe the current hash contains a repositoryId so remove it
     if (newLocation.indexOf("~")>-1){
       newLocation=currentHash.substringBeforeFirst("~");
     }
     if (selectedRepository){
       newLocation+="~"+selectedRepository;
+    }
+    if (currentHash.indexOf("/")>-1) {
+        // MRM-1767 
+        // from all to internal
+        // #browse -> #browse~internal
+        // #browse/org.a.....  -> #browse~internal/org.a.... not #browse~internalorg.a
+        newLocation += "/";
     }
     newLocation += currentHash.substringAfterFirst("/");
     // do we have extra path after repository ?
@@ -1693,6 +1701,7 @@ define("archiva.search",["jquery","jquery.ui","i18n","jquery.tmpl","select2","kn
     this.artifactId=null;
     this.artifact=false;
     this.version=null;
+    this.fileExtension=null;
   }
   mapVersionsList=function(data){
     if (data){
@@ -1963,44 +1972,36 @@ define("archiva.search",["jquery","jquery.ui","i18n","jquery.tmpl","select2","kn
     this.bundleDescription=bundleDescription;
 
     // contains osgi metadata Bundle-Name if available
-    //private String bundleName;
     this.bundleName=bundleName;
 
     //contains osgi metadata Bundle-License if available
-    //private String bundleLicense;
     this.bundleLicense=bundleLicense;
 
     ///contains osgi metadata Bundle-DocURL if available
-    //private String bundleDocUrl;
     this.bundleDocUrl=bundleDocUrl;
 
     // contains osgi metadata Import-Package if available
-    //private String bundleImportPackage;
     this.bundleImportPackage=bundleImportPackage;
 
     ///contains osgi metadata Require-Bundle if available
-    //private String bundleRequireBundle;
     this.bundleRequireBundle=bundleRequireBundle;
 
-    //private String classifier;
     this.classifier=classifier;
 
-    //private String packaging;
     this.packaging=packaging;
 
     //file extension of the artifact
-    //private String fileExtension;
     this.fileExtension=fileExtension;
 
     this.size=size;
 
     this.crumbEntries=function(){
-      return calculateCrumbEntries(self.groupId,self.artifactId,self.version);
+      return calculateCrumbEntries(self.groupId,self.artifactId,self.version,self.fileExtension);
     }
 
   }
 
-  calculateCrumbEntries=function(groupId,artifactId,version){
+  calculateCrumbEntries=function(groupId,artifactId,version,fileExtension){
     var splitted = groupId.split(".");
     var breadCrumbEntries=[];
     var curGroupId="";
@@ -2012,12 +2013,14 @@ define("archiva.search",["jquery","jquery.ui","i18n","jquery.tmpl","select2","kn
     var crumbEntryArtifact=new BreadCrumbEntry(groupId,artifactId);
     crumbEntryArtifact.artifactId=artifactId;
     crumbEntryArtifact.artifact=true;
+    crumbEntryArtifact.fileExtension=fileExtension;
     breadCrumbEntries.push(crumbEntryArtifact);
 
     var crumbEntryVersion=new BreadCrumbEntry(groupId,version);
     crumbEntryVersion.artifactId=artifactId;
     crumbEntryVersion.artifact=false;
     crumbEntryVersion.version=version;
+    crumbEntryVersion.fileExtension=fileExtension;
     breadCrumbEntries.push(crumbEntryVersion);
 
     return breadCrumbEntries;
@@ -2086,6 +2089,9 @@ define("archiva.search",["jquery","jquery.ui","i18n","jquery.tmpl","select2","kn
     this.includePomArtifacts=ko.observable(true);
 
     this.classifier=ko.observable();
+
+    // private int pageSize = 30;
+    this.pageSize = ko.observable( 30 );
   }
 
   /**
@@ -2298,9 +2304,7 @@ define("archiva.search",["jquery","jquery.ui","i18n","jquery.tmpl","select2","kn
       location+="/";
       if(self.searchRequest().groupId()){
         location+=self.searchRequest().groupId();
-      }/*else{
-        location+='~';
-      }*/
+      }
       if(self.searchRequest().artifactId()){
         location+='~'+self.searchRequest().artifactId();
       }else{
@@ -2323,6 +2327,11 @@ define("archiva.search",["jquery","jquery.ui","i18n","jquery.tmpl","select2","kn
       }
       if(self.searchRequest().className()){
         location+='~'+self.searchRequest().className();
+      }else{
+        location+='~';
+      }
+      if(self.searchRequest().pageSize()){
+        location+='~'+self.searchRequest().pageSize();
       }else{
         location+='~';
       }
