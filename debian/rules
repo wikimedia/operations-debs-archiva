@@ -4,12 +4,15 @@
 #export DH_VERBOSE=1
 
 %:
-	dh $@
+	dh $@ --with=systemd
 
 override_dh_install:
 	dh_install
 	install $(CURDIR)/bin/wrapper-linux-x86-64 $(CURDIR)/debian/archiva/usr/sbin/archiva
 	cp -r $(CURDIR)/apps     $(CURDIR)/debian/archiva/usr/share/archiva/
 	# For some reason, the files in the apps and lib directories
-	# in the original 2.0.0 release tarball are 0755.
+	# in the original release tarball are 0755.
 	find $(CURDIR)/debian/archiva/usr/share/archiva -type f -exec chmod 0644 {} \;
+
+override_dh_installinit:
+	# Don't install any init scripts

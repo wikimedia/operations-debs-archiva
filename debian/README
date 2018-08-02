@@ -1,0 +1,22 @@
+The content of this debian package comes from:
+
+https://archiva.apache.org/download.cgi (Standalone version)
+
+To upgrade from 2.0.0 to 2.2.3 I did the following:
+
+* Replace the content of the old release with the new one (a simple cp is fine).
+  Pay particular attention to the apps and lib directories, since simply copying
+  would leave multiple versions of the same jar (so wipe those dirs first to be
+  sure).
+
+* Verify the versions of the jars in archiva.install, they need to match with
+  what present in lib.
+
+The following command worked fine to build the package from the build host:
+
+GIT_PBUILDER_AUTOCONF=no DIST=stretch-wikimedia WIKIMEDIA=yes \
+    gbp buildpackage -sa -us -uc --git-builder=git-pbuilder
+
+Note: the master branch needs to be tagged correctly to generate the orig.tar.gz
+      file (in this case, a tag named 'upstream/2.2.3' for the last commit in
+      master was enough).

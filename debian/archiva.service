@@ -1,0 +1,14 @@
+[Unit]
+Description=The build artifact repository manager
+After=network.target
+ConditionPathExists=/var/run/archiva
+
+[Service]
+Type=forking
+User=archiva
+SyslogIdentifier=archiva
+EnvironmentFile=-/etc/default/archiva
+ExecStart=/usr/sbin/archiva /etc/archiva/archiva.conf wrapper.syslog.ident=archiva wrapper.pidfile=/var/run/archiva/archiva.pid wrapper.daemonize=TRUE $ARCHIVA_OPTS
+
+[Install]
+WantedBy=multi-user.target

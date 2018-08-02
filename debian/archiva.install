@@ -27,6 +27,6 @@ lib/jetty-util-8.1.14.v20131031.jar                usr/share/archiva/lib
 lib/jetty-webapp-8.1.14.v20131031.jar              usr/share/archiva/lib
 lib/jetty-xml-8.1.14.v20131031.jar                 usr/share/archiva/lib
 lib/mail-1.4.jar                                   usr/share/archiva/lib
-lib/tomcat-jdbc-7.0.50.jar                         usr/share/archiva/lib
-lib/tomcat-juli-7.0.50.jar                         usr/share/archiva/lib
+lib/tomcat-jdbc-7.0.54.jar                         usr/share/archiva/lib
+lib/tomcat-juli-7.0.54.jar                         usr/share/archiva/lib
 lib/wrapper.jar                                    usr/share/archiva/lib

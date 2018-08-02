@@ -1,3 +1,15 @@
+archiva (2.2.3-1) stretch-wikimedia; urgency=low
+
+  * Import upstsream release 2.2.3.
+  * Add myself to Uploaders.
+  * Bump Standards-Version to 3.9.8.
+  * Simplified copyright file.
+  * Updated tomcat references in archiva.install file.
+  * Added systemd unit and modified rules accordingly.
+  * Removed init support.
+
+ -- Luca Toscano (WMF) <ltoscano@wikimedia.org>  Wed, 1 Aug 2018 20:17:27 +0000
+
 archiva (2.0.0-1) unstable; urgency=low
 
   * Initial release

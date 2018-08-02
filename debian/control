@@ -2,8 +2,9 @@ Source: archiva
 Section: misc
 Priority: extra
 Maintainer: Andrew Otto (WMF) <otto@wikimedia.org>
+Uploaders: Luca Toscano <ltoscano@wikimedia.org>
 Build-Depends: debhelper (>= 9)
-Standards-Version: 3.9.3
+Standards-Version: 3.9.8
 Homepage: http://archiva.apache.org
 
 Package: archiva
