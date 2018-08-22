@@ -1,3 +1,9 @@
+archiva (2.2.3-2) stretch-wikimedia; urgency=low
+
+  * Create the /var/run/archiva directory via .dirs file.
+
+ -- Luca Toscano (WMF) <ltoscano@wikimedia.org>  Wed, 22 Aug 2018 16:17:27 +0000
+
 archiva (2.2.3-1) stretch-wikimedia; urgency=low
 
   * Import upstsream release 2.2.3.

@@ -26,6 +26,7 @@ case "$1" in
         chown archiva:archiva /var/lib/archiva/conf
         chown archiva:archiva /var/lib/archiva/conf/archiva.xml
         chown archiva:archiva /var/log/archiva
+        chown archiva:archiva /var/run/archiva
 
         # For some reason, the files in the apps and lib directories
         # in the original 2.0.0 release tarball are 0755.  chmoding

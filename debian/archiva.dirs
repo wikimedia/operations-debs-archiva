@@ -1,3 +1,4 @@
 usr/sbin
 var/cache/archiva
 var/log/archiva
+var/run/archiva
