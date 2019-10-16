@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------
 
 Apache Archiva
-Copyright 2006-2017 The Apache Software Foundation
+Copyright 2006-2019 The Apache Software Foundation
 
 This product includes/uses software(s) developed by 'an unknown organization'
   - tomcat-jdbc (http://tomcat.apache.org/)
@@ -39,6 +39,6 @@ This product includes/uses software(s) developed by 'Sun Microsystems' (http://w
 This product includes/uses software(s) developed by 'The Apache Software Foundation' (http://www.apache.org/)
   - Apache Ant Core (http://ant.apache.org/ant/)
   - Apache Ant Launcher (http://ant.apache.org/ant-launcher/)
-  - Archiva Web :: Javascript Application (http://archiva.apache.org/ref/2.2.3/archiva-web/archiva-webapp)
+  - Archiva Web :: Javascript Application (http://archiva.apache.org/ref/2.2.4/archiva-web/archiva-webapp)
 
 
