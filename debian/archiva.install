@@ -1,4 +1,3 @@
-debian/var/lib/archiva/conf/archiva.xml            var/lib/archiva/conf
 debian/etc/archiva/archiva.conf                    etc/archiva
 debian/etc/archiva/jetty.xml                       etc/archiva
 debian/etc/archiva/jetty-contexts/archiva.xml      etc/archiva/jetty-contexts

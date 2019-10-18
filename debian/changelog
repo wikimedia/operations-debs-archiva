@@ -1,3 +1,9 @@
+archiva (2.2.4-2) stretch-wikimedia; urgency=low
+
+  * Remove archiva.xml from the default install list.
+
+ -- Luca Toscano (WMF) <ltoscano@wikimedia.org>  Fri, 18 Oct 2019 11:00:27 +0000
+
 archiva (2.2.4-1) stretch-wikimedia; urgency=low
 
   * Import upstream release 2.2.4
