@@ -1,0 +1,23 @@
+diff --git a/apps/archiva/WEB-INF/web.xml b/apps/archiva/WEB-INF/web.xml
+index e1ac74b..fec9acd 100644
+--- a/apps/archiva/WEB-INF/web.xml
++++ b/apps/archiva/WEB-INF/web.xml
+@@ -160,6 +160,17 @@
+     <servlet-name>CXFServlet</servlet-name>
+     <url-pattern>/restServices/*</url-pattern>
+   </servlet-mapping>
++
++  <!-- Removing dir-listing from Jetty default-servlet -->
++  <servlet>
++    <servlet-name>default</servlet-name>
++    <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
++    <init-param>
++      <param-name>dirAllowed</param-name>
++      <param-value>false</param-value>
++    </init-param>
++    <load-on-startup>0</load-on-startup>
++  </servlet>
+
+   <welcome-file-list>
+     <welcome-file>index.html</welcome-file>
+

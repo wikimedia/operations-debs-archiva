@@ -1,3 +1,9 @@
+archiva (2.2.4-3) buster-wikimedia; urgency=medium
+
+  * Add 01-disable_jetty_dir_listing.patch
+
+ -- Luca Toscano (WMF) <ltoscano@wikimedia.org>  Fri, 15 Jan 2021 16:00:27 +0000
+
 archiva (2.2.4-2) stretch-wikimedia; urgency=low
 
   * Remove archiva.xml from the default install list.
