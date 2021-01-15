@@ -1,9 +1,3 @@
-archiva (2.2.4-3) buster-wikimedia; urgency=low
-
-  * Disable Jetty's default directory listing servlet (T272082).
-
- -- Luca Toscano (WMF) <ltoscano@wikimedia.org>  Fri, 15 Jan 2021 14:37:27 +0000
-
 archiva (2.2.4-2) stretch-wikimedia; urgency=low
 
   * Remove archiva.xml from the default install list.
