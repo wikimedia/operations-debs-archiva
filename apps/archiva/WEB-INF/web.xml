@@ -112,6 +112,7 @@
     <load-on-startup>3</load-on-startup>
   </servlet>
 
+
   <servlet>
     <servlet-name>RssFeedServlet</servlet-name>
     <servlet-class>
@@ -123,7 +124,7 @@
     <servlet-name>RssFeedServlet</servlet-name>
     <url-pattern>/feeds/*</url-pattern>
   </servlet-mapping>
-
+  
   <servlet-mapping>
     <servlet-name>RestDocumentation</servlet-name>
     <url-pattern>/rest-docs/*</url-pattern>
@@ -133,6 +134,7 @@
     <servlet-name>RepositoryServlet</servlet-name>
     <url-pattern>/repository/*</url-pattern>
   </servlet-mapping>
+
 
 
   <resource-ref>
@@ -158,18 +160,7 @@
     <servlet-name>CXFServlet</servlet-name>
     <url-pattern>/restServices/*</url-pattern>
   </servlet-mapping>
-
-  <!-- Removing dir-listing from Jetty default-servlet -->
-  <servlet>
-    <servlet-name>default</servlet-name>
-    <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
-    <init-param>
-      <param-name>dirAllowed</param-name>
-      <param-value>false</param-value>
-    </init-param>
-    <load-on-startup>0</load-on-startup>
-  </servlet>
-
+  
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>
   </welcome-file-list>
